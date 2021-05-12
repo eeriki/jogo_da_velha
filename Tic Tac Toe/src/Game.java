@@ -39,20 +39,12 @@ public class Game extends Canvas implements Runnable, MouseListener, KeyListener
 	public static String modo;
 	public static String scene = "main";
 	
-	public static int[] botoes;
-	
-	public boolean p1vic = false;
-	public boolean p2vic = false;
 	public int p1 = 0, p2 = 0;
-	public boolean empate = false;
-	
-	public boolean vitoria = false, derrota = false;
 	
 	public Game() {
 		this.setPreferredSize(new Dimension(WIDTH,HEIGHT));
 		this.addMouseListener(this);
 		this.addKeyListener(this);
-		botoes = new int[2];
 		try {
 			PLAYER_SPRITE = ImageIO.read(getClass().getResource("/player.png"));
 			OPONENTE_SPRITE = ImageIO.read(getClass().getResource("/oponente.png"));
@@ -77,7 +69,7 @@ public class Game extends Canvas implements Runnable, MouseListener, KeyListener
 	}
 
 	public void tick() {
-		if(scene == "jogando") {
+		if(scene.equals("jogando")) {
 			if(CURRENT == PLAYER) {
 				if(pressed) {
 					pressed = false;
@@ -87,33 +79,7 @@ public class Game extends Canvas implements Runnable, MouseListener, KeyListener
 						TABULEIRO[mx][my] = PLAYER;
 						CURRENT = OPONENTE;
 					}
-					if(
-					   //horizontal//
-					   TABULEIRO[0][0] == PLAYER && TABULEIRO[1][0] == PLAYER && TABULEIRO[2][0] == PLAYER ||
-					   TABULEIRO[0][1] == PLAYER && TABULEIRO[1][1] == PLAYER && TABULEIRO[2][1] == PLAYER ||
-					   TABULEIRO[0][2] == PLAYER && TABULEIRO[1][2] == PLAYER && TABULEIRO[2][2] == PLAYER ||
-					   //vertical//
-					   TABULEIRO[0][0] == PLAYER && TABULEIRO[0][1] == PLAYER && TABULEIRO[0][2] == PLAYER ||
-					   TABULEIRO[1][0] == PLAYER && TABULEIRO[1][1] == PLAYER && TABULEIRO[1][2] == PLAYER ||
-					   TABULEIRO[2][0] == PLAYER && TABULEIRO[2][1] == PLAYER && TABULEIRO[2][2] == PLAYER ||
-					   //diagonal//
-					   TABULEIRO[0][0] == PLAYER && TABULEIRO[1][1] == PLAYER && TABULEIRO[2][2] == PLAYER ||
-					   TABULEIRO[2][0] == PLAYER && TABULEIRO[1][1] == PLAYER && TABULEIRO[0][2] == PLAYER) {
-						if(modo == "duo") {
-							p1vic = true;
-							if(p1vic) {
-								p1+=1;
-								resetTabuleiro();
-							}
-						}else if(modo == "solo"){
-							vitoria = true;
-							if(vitoria) {
-								p1+=1;
-								resetTabuleiro();
-							}
-						}
-					}
-					//*/
+					
 				}
 			}
 			
@@ -130,55 +96,22 @@ public class Game extends Canvas implements Runnable, MouseListener, KeyListener
 					}
 				} else if(modo == "solo"){
 					//*aqui fica a I.A*//
+					
 				}
 				
-				//*empate*//
-				if(
-				   //horizontal//
-				   TABULEIRO[0][0] == OPONENTE && TABULEIRO[1][0] == OPONENTE && TABULEIRO[2][0] == OPONENTE ||
-				   TABULEIRO[0][1] == OPONENTE && TABULEIRO[1][1] == OPONENTE && TABULEIRO[2][1] == OPONENTE ||
-				   TABULEIRO[0][2] == OPONENTE && TABULEIRO[1][2] == OPONENTE && TABULEIRO[2][2] == OPONENTE ||
-				   //vertical//
-				   TABULEIRO[0][0] == OPONENTE && TABULEIRO[0][1] == OPONENTE && TABULEIRO[0][2] == OPONENTE ||
-				   TABULEIRO[1][0] == OPONENTE && TABULEIRO[1][1] == OPONENTE && TABULEIRO[1][2] == OPONENTE ||
-				   TABULEIRO[2][0] == OPONENTE && TABULEIRO[2][1] == OPONENTE && TABULEIRO[2][2] == OPONENTE ||
-				   //diagonal//
-				   TABULEIRO[0][0] == OPONENTE && TABULEIRO[1][1] == OPONENTE && TABULEIRO[2][2] == OPONENTE ||
-				   TABULEIRO[2][0] == OPONENTE && TABULEIRO[1][1] == OPONENTE && TABULEIRO[0][2] == OPONENTE) {
-					if(modo == "duo") {
-						p2vic = true;
-						if(p2vic) {
-							p2+=1;
-							resetTabuleiro();
-						}
-					}else if(modo == "solo"){
-						derrota = true;
-						if(derrota) {
-							p2+=1;
-							resetTabuleiro();
-						}
-					}
+				///verificação do vencedor///
+				if(checkVictory() == 1) {
+					resetTabuleiro();
+					p1++;
+					
+				} else if(checkVictory() == -1) {
+					resetTabuleiro();
+					p2++;
+					
+				}else if(checkVictory() == 3) {
+					resetTabuleiro();
+					
 				}
-			}
-			
-			if(
-			   //horizontal//
-			   TABULEIRO[0][0] != 0 && TABULEIRO[1][0] != 0 && TABULEIRO[2][0] != 0 &&
-			   TABULEIRO[0][1] != 0 && TABULEIRO[1][1] != 0 && TABULEIRO[2][1] != 0 &&
-			   TABULEIRO[0][2] != 0 && TABULEIRO[1][2] != 0 && TABULEIRO[2][2] != 0 &&
-			   //vertical//
-			   TABULEIRO[0][0] != 0 && TABULEIRO[0][1] != 0 && TABULEIRO[0][2] != 0 &&
-			   TABULEIRO[1][0] != 0 && TABULEIRO[1][1] != 0 && TABULEIRO[1][2] != 0 &&
-			   TABULEIRO[2][0] != 0 && TABULEIRO[2][1] != 0 && TABULEIRO[2][2] != 0 &&
-			   //diagonal//
-			   TABULEIRO[0][0] != 0 && TABULEIRO[1][1] != 0 && TABULEIRO[2][2] != 0 &&
-			   TABULEIRO[2][0] != 0 && TABULEIRO[1][1] != 0 && TABULEIRO[0][2] != 0)
-			{
-				empate = true;
-				if(empate) {
-					empate = false;
-				}
-				resetTabuleiro();
 			}
 		}
 		else if(scene == "main") {
@@ -193,8 +126,65 @@ public class Game extends Canvas implements Runnable, MouseListener, KeyListener
 				}
 			}
 		}
+		
 	}
 
+	public int checkVictory() {
+		//*verificação do vencedor*//
+		if(
+		   //horizontal//
+		   TABULEIRO[0][0] == PLAYER && TABULEIRO[1][0] == PLAYER && TABULEIRO[2][0] == PLAYER ||
+		   TABULEIRO[0][1] == PLAYER && TABULEIRO[1][1] == PLAYER && TABULEIRO[2][1] == PLAYER ||
+		   TABULEIRO[0][2] == PLAYER && TABULEIRO[1][2] == PLAYER && TABULEIRO[2][2] == PLAYER ||
+		   //vertical//
+		   TABULEIRO[0][0] == PLAYER && TABULEIRO[0][1] == PLAYER && TABULEIRO[0][2] == PLAYER ||
+		   TABULEIRO[1][0] == PLAYER && TABULEIRO[1][1] == PLAYER && TABULEIRO[1][2] == PLAYER ||
+		   TABULEIRO[2][0] == PLAYER && TABULEIRO[2][1] == PLAYER && TABULEIRO[2][2] == PLAYER ||
+		   //diagonal//
+		   TABULEIRO[0][0] == PLAYER && TABULEIRO[1][1] == PLAYER && TABULEIRO[2][2] == PLAYER ||
+		   TABULEIRO[2][0] == PLAYER && TABULEIRO[1][1] == PLAYER && TABULEIRO[0][2] == PLAYER) {
+			
+			return 1;
+			
+		}
+		
+		else if(
+		   //horizontal//
+		   TABULEIRO[0][0] == OPONENTE && TABULEIRO[1][0] == OPONENTE && TABULEIRO[2][0] == OPONENTE ||
+		   TABULEIRO[0][1] == OPONENTE && TABULEIRO[1][1] == OPONENTE && TABULEIRO[2][1] == OPONENTE ||
+		   TABULEIRO[0][2] == OPONENTE && TABULEIRO[1][2] == OPONENTE && TABULEIRO[2][2] == OPONENTE ||
+		   //vertical//
+		   TABULEIRO[0][0] == OPONENTE && TABULEIRO[0][1] == OPONENTE && TABULEIRO[0][2] == OPONENTE ||
+		   TABULEIRO[1][0] == OPONENTE && TABULEIRO[1][1] == OPONENTE && TABULEIRO[1][2] == OPONENTE ||
+		   TABULEIRO[2][0] == OPONENTE && TABULEIRO[2][1] == OPONENTE && TABULEIRO[2][2] == OPONENTE ||
+		   //diagonal//
+		   TABULEIRO[0][0] == OPONENTE && TABULEIRO[1][1] == OPONENTE && TABULEIRO[2][2] == OPONENTE ||
+		   TABULEIRO[2][0] == OPONENTE && TABULEIRO[1][1] == OPONENTE && TABULEIRO[0][2] == OPONENTE) {
+			
+			return -1;
+			
+		}
+		if(
+		   //horizontal//
+		   TABULEIRO[0][0] != 0 && TABULEIRO[1][0] != 0 && TABULEIRO[2][0] != 0 &&
+		   TABULEIRO[0][1] != 0 && TABULEIRO[1][1] != 0 && TABULEIRO[2][1] != 0 &&
+		   TABULEIRO[0][2] != 0 && TABULEIRO[1][2] != 0 && TABULEIRO[2][2] != 0 &&
+		   //vertical//
+		   TABULEIRO[0][0] != 0 && TABULEIRO[0][1] != 0 && TABULEIRO[0][2] != 0 &&
+		   TABULEIRO[1][0] != 0 && TABULEIRO[1][1] != 0 && TABULEIRO[1][2] != 0 &&
+		   TABULEIRO[2][0] != 0 && TABULEIRO[2][1] != 0 && TABULEIRO[2][2] != 0 &&
+		   //diagonal//
+		   TABULEIRO[0][0] != 0 && TABULEIRO[1][1] != 0 && TABULEIRO[2][2] != 0 &&
+		   TABULEIRO[2][0] != 0 && TABULEIRO[1][1] != 0 && TABULEIRO[0][2] != 0)
+		{
+			
+			return 3;
+			
+		}
+		return 0;
+		
+	}
+		
 	public void render() {
 		BufferStrategy bs = this.getBufferStrategy();
 		if(bs == null) {
@@ -260,7 +250,7 @@ public class Game extends Canvas implements Runnable, MouseListener, KeyListener
 		g.dispose();
 		bs.show();
 	}
-
+	
 	public static void main(String args[]) {
 		Game game = new Game();
 		JFrame frame = new JFrame("Tic Tac Toe");
@@ -297,9 +287,11 @@ public class Game extends Canvas implements Runnable, MouseListener, KeyListener
 
 	@Override
 	public void mousePressed(MouseEvent e) {
-		pressed = true;
-		mx = e.getX();
-		my = e.getY();
+		if(e.getButton() == MouseEvent.BUTTON1) {
+			pressed = true;
+			mx = e.getX();
+			my = e.getY();
+		}
 		
 	}
 
@@ -327,8 +319,6 @@ public class Game extends Canvas implements Runnable, MouseListener, KeyListener
 			if(e.getKeyCode() == KeyEvent.VK_ESCAPE) {
 				scene = "main";
 				resetTabuleiro();
-				p1 = 0;
-				p2 = 0;
 			}
 		}
 		
