@@ -15,6 +15,8 @@ import java.awt.event.MouseListener;
 import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.imageio.ImageIO;
 import javax.swing.JFrame;
@@ -40,6 +42,8 @@ public class Game extends Canvas implements Runnable, MouseListener, KeyListener
 	public static String scene = "main";
 	
 	public int p1 = 0, p2 = 0;
+	
+	public static int turns = 0;
 	
 	public Game() {
 		this.setPreferredSize(new Dimension(WIDTH,HEIGHT));
@@ -95,21 +99,36 @@ public class Game extends Canvas implements Runnable, MouseListener, KeyListener
 						}
 					}
 				} else if(modo == "solo"){
-					//*aqui fica a I.A*//
-					
+					//*ALGORÍTMO MINIMAX*//
+					for(int xx = 0; xx < TABULEIRO.length; xx++) {
+						for(int yy = 0; yy < TABULEIRO.length; yy++) {		
+							if(TABULEIRO[xx][yy] == 0) {
+								Node bestMove = getBestMove(xx, yy, 0, OPONENTE);
+								
+								TABULEIRO[bestMove.x][bestMove.y] = OPONENTE;
+								
+								CURRENT = PLAYER;
+								
+								return;
+							}
+						}
+					}
 				}
 				
 				///verificação do vencedor///
-				if(checkVictory() == 1) {
+				if(checkVictory() == PLAYER) {
 					resetTabuleiro();
+					
 					p1++;
 					
-				} else if(checkVictory() == -1) {
+				} else if(checkVictory() == OPONENTE) {
 					resetTabuleiro();
+					
 					p2++;
 					
-				}else if(checkVictory() == 3) {
+				}else if(checkVictory() == 0) {
 					resetTabuleiro();
+					
 					
 				}
 			}
@@ -126,27 +145,76 @@ public class Game extends Canvas implements Runnable, MouseListener, KeyListener
 				}
 			}
 		}
-		
 	}
-
+	
+	public Node getBestMove(int x, int y, int depth, int turn) {
+		if(checkVictory() == PLAYER) {
+			return new Node(x,y,depth-10,depth);
+		}else if(checkVictory() == OPONENTE) {
+			return new Node(x,y,10-depth,depth);
+		}else if(checkVictory() == -10) {
+			return new Node(x,y,0,depth);
+		}
+		
+		List<Node> nodes = new ArrayList<Node>();
+		for(int xx = 0; xx < TABULEIRO.length; xx++) {
+			for(int yy = 0; yy < TABULEIRO.length; yy++) {
+				if(TABULEIRO[xx][yy] == 0) {
+					Node node;
+					if(turn == PLAYER) {
+						TABULEIRO[xx][yy] = PLAYER;
+						node = getBestMove(xx, yy, depth+1,OPONENTE);
+						TABULEIRO[xx][yy] = 0;
+					}else {
+						TABULEIRO[xx][yy] = OPONENTE;
+						node = getBestMove(xx, yy, depth+1, PLAYER);
+						TABULEIRO[xx][yy] = 0;
+					}
+					nodes.add(node);
+				}
+			}
+		}
+		
+		Node finalNode = nodes.get(0);
+		for(int i = 0; i < nodes.size(); i++) {
+			Node n = nodes.get(i);
+			if(turn == PLAYER) {
+				if(n.score > finalNode.score) {
+					finalNode = n;
+				}
+			}else{
+				if(n.score < finalNode.score) {
+					finalNode = n;
+				}
+			}
+		}
+		
+		return finalNode;
+	}
+	
+	
 	public int checkVictory() {
 		//*verificação do vencedor*//
 		if(
-		   //horizontal//
-		   TABULEIRO[0][0] == PLAYER && TABULEIRO[1][0] == PLAYER && TABULEIRO[2][0] == PLAYER ||
-		   TABULEIRO[0][1] == PLAYER && TABULEIRO[1][1] == PLAYER && TABULEIRO[2][1] == PLAYER ||
-		   TABULEIRO[0][2] == PLAYER && TABULEIRO[1][2] == PLAYER && TABULEIRO[2][2] == PLAYER ||
-		   //vertical//
-		   TABULEIRO[0][0] == PLAYER && TABULEIRO[0][1] == PLAYER && TABULEIRO[0][2] == PLAYER ||
-		   TABULEIRO[1][0] == PLAYER && TABULEIRO[1][1] == PLAYER && TABULEIRO[1][2] == PLAYER ||
-		   TABULEIRO[2][0] == PLAYER && TABULEIRO[2][1] == PLAYER && TABULEIRO[2][2] == PLAYER ||
-		   //diagonal//
-		   TABULEIRO[0][0] == PLAYER && TABULEIRO[1][1] == PLAYER && TABULEIRO[2][2] == PLAYER ||
-		   TABULEIRO[2][0] == PLAYER && TABULEIRO[1][1] == PLAYER && TABULEIRO[0][2] == PLAYER) {
+		   TABULEIRO[0][0] == PLAYER && TABULEIRO[1][0] == PLAYER && TABULEIRO[2][0] == PLAYER)
+			return PLAYER;
+		   if(TABULEIRO[0][1] == PLAYER && TABULEIRO[1][1] == PLAYER && TABULEIRO[2][1] == PLAYER) 
+			   return PLAYER;
+		   if(TABULEIRO[0][2] == PLAYER && TABULEIRO[1][2] == PLAYER && TABULEIRO[2][2] == PLAYER )
+			   return PLAYER;
+		   if(TABULEIRO[0][0] == PLAYER && TABULEIRO[0][1] == PLAYER && TABULEIRO[0][2] == PLAYER )
+			   return PLAYER;
+		   if(TABULEIRO[1][0] == PLAYER && TABULEIRO[1][1] == PLAYER && TABULEIRO[1][2] == PLAYER )
+			   return PLAYER;
+		   if(TABULEIRO[2][0] == PLAYER && TABULEIRO[2][1] == PLAYER && TABULEIRO[2][2] == PLAYER )
+			   return PLAYER;
+		   if(TABULEIRO[0][0] == PLAYER && TABULEIRO[1][1] == PLAYER && TABULEIRO[2][2] == PLAYER )
+			   return PLAYER;
+		   if(TABULEIRO[2][0] == PLAYER && TABULEIRO[1][1] == PLAYER && TABULEIRO[0][2] == PLAYER) 
 			
-			return 1;
+			return PLAYER;
 			
-		}
+		
 		
 		else if(
 		   //horizontal//
@@ -161,27 +229,23 @@ public class Game extends Canvas implements Runnable, MouseListener, KeyListener
 		   TABULEIRO[0][0] == OPONENTE && TABULEIRO[1][1] == OPONENTE && TABULEIRO[2][2] == OPONENTE ||
 		   TABULEIRO[2][0] == OPONENTE && TABULEIRO[1][1] == OPONENTE && TABULEIRO[0][2] == OPONENTE) {
 			
-			return -1;
+			return OPONENTE;
 			
 		}
-		if(
-		   //horizontal//
-		   TABULEIRO[0][0] != 0 && TABULEIRO[1][0] != 0 && TABULEIRO[2][0] != 0 &&
-		   TABULEIRO[0][1] != 0 && TABULEIRO[1][1] != 0 && TABULEIRO[2][1] != 0 &&
-		   TABULEIRO[0][2] != 0 && TABULEIRO[1][2] != 0 && TABULEIRO[2][2] != 0 &&
-		   //vertical//
-		   TABULEIRO[0][0] != 0 && TABULEIRO[0][1] != 0 && TABULEIRO[0][2] != 0 &&
-		   TABULEIRO[1][0] != 0 && TABULEIRO[1][1] != 0 && TABULEIRO[1][2] != 0 &&
-		   TABULEIRO[2][0] != 0 && TABULEIRO[2][1] != 0 && TABULEIRO[2][2] != 0 &&
-		   //diagonal//
-		   TABULEIRO[0][0] != 0 && TABULEIRO[1][1] != 0 && TABULEIRO[2][2] != 0 &&
-		   TABULEIRO[2][0] != 0 && TABULEIRO[1][1] != 0 && TABULEIRO[0][2] != 0)
-		{
-			
-			return 3;
-			
+		//*empate*//
+		int cur = 0;
+		for(int xx = 0; xx < TABULEIRO.length; xx++) {
+			for(int yy = 0; yy < TABULEIRO.length; yy++) {
+				if(TABULEIRO[xx][yy] != 0) {
+					cur++;
+				}
+			}
 		}
-		return 0;
+		if(cur == TABULEIRO.length *TABULEIRO[0].length) {
+			return 0;
+		}
+		
+		return -10;
 		
 	}
 		
@@ -278,7 +342,6 @@ public class Game extends Canvas implements Runnable, MouseListener, KeyListener
 		
 	}
 
-
 	@Override
 	public void mouseClicked(MouseEvent e) {
 		
@@ -288,11 +351,10 @@ public class Game extends Canvas implements Runnable, MouseListener, KeyListener
 	@Override
 	public void mousePressed(MouseEvent e) {
 		if(e.getButton() == MouseEvent.BUTTON1) {
-			pressed = true;
-			mx = e.getX();
-			my = e.getY();
-		}
-		
+		pressed = true;
+		mx = e.getX();
+		my = e.getY();
+		}	
 	}
 
 	@Override
